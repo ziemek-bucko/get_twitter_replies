@@ -1,0 +1,42 @@
+```{r}
+require(rjson)
+require(httr)
+require(jsonlite)
+require(dplyr)
+require(purrr)
+```
+
+```{r}
+bearer_token <- "your-token" #The bearer token of the app you set up on Twitter's Developer Portal
+headers <- c(`Authorization` = sprintf('Bearer %s', bearer_token))
+```
+
+```{r}
+tweet_id <- ('your-tweet-id') #The ID of the tweet you want to get replies for - it's the last part of the URL
+params <- list("expansions" = "author_id", "user.fields"= "name,username")
+url_handle <-
+  paste0('https://api.twitter.com/2/tweets/search/recent?query=conversation_id:', tweet_id)
+```
+
+```{r}
+response <-
+  httr::GET(url = url_handle,
+            httr::add_headers(.headers = headers),
+            query = params)
+obj <- httr::content(response, as = "text")
+x <- rjson::fromJSON(obj)
+```
+
+
+```{r}
+replies = do.call(rbind.data.frame, x[["data"]])
+authors = do.call(rbind.data.frame, x[["includes"]][["users"]])
+```
+
+```{r}
+colnames(authors)[1] = "author_id"
+dat = merge(authors, replies, by = "author_id")
+dat = dat[,c(1:5)]
+write.csv(dat, paste0("replies-to-", tweet_id, ".csv"))
+```
+
