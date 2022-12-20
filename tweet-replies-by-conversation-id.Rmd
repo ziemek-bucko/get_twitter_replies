@@ -25,6 +25,6 @@ authors = do.call(rbind.data.frame, x[["includes"]][["users"]])
 
 colnames(authors)[1] = "author_id"
 dat = merge(authors, replies, by = "author_id")
-dat = dat[,c(1:5)]
+dat = dat[,c(1:6)]
 write.csv(dat, paste0("replies-to-", tweet_id, ".csv"))
 
